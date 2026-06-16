@@ -13,6 +13,9 @@ __all__ = ["LookbackOptionPricer"]
 
 _NORM = stats.norm
 
+# Broadie-Glasserman-Kou continuity-correction constant: -zeta(1/2)/sqrt(2*pi).
+_BGK_BETA = 0.5826
+
 
 class LookbackOptionPricer:
     """Monte Carlo pricer for lookback options with analytical benchmarks.
@@ -31,6 +34,12 @@ class LookbackOptionPricer:
     # ------------------------------------------------------------------
     # Monte Carlo pricing
     # ------------------------------------------------------------------
+    @staticmethod
+    def _continuity_factor(sigma: float, T: float, n_steps: int) -> float:
+        """BGK multiplicative shift from a discrete extremum to a continuous one."""
+        dt = T / n_steps
+        return float(np.exp(_BGK_BETA * sigma * np.sqrt(dt)))
+
     def price_fixed_strike(
         self,
         paths: np.ndarray,
@@ -38,14 +47,33 @@ class LookbackOptionPricer:
         r: float,
         T: float,
         option_type: str = "call",
+        sigma: float = None,
+        continuity_correction: bool = False,
     ) -> MCResult:
-        """Price a fixed-strike lookback option by Monte Carlo."""
+        """Price a fixed-strike lookback option by Monte Carlo.
+
+        Parameters
+        ----------
+        sigma : float, optional
+            Volatility; required when ``continuity_correction`` is ``True``.
+        continuity_correction : bool, default False
+            Apply the Broadie-Glasserman-Kou shift so the discretely sampled
+            extremum estimates its continuous counterpart.
+        """
         start = time.perf_counter()
         option_type = option_type.lower()
+        running_max = paths.max(axis=1)
+        running_min = paths.min(axis=1)
+        if continuity_correction:
+            if sigma is None:
+                raise ValueError("continuity_correction=True requires sigma")
+            factor = self._continuity_factor(sigma, T, paths.shape[1] - 1)
+            running_max = running_max * factor
+            running_min = running_min / factor
         if option_type == "call":
-            payoff = np.maximum(paths.max(axis=1) - K, 0.0)
+            payoff = np.maximum(running_max - K, 0.0)
         else:
-            payoff = np.maximum(K - paths.min(axis=1), 0.0)
+            payoff = np.maximum(K - running_min, 0.0)
         disc = np.exp(-r * T) * payoff
         res = MonteCarloEngine.summarize(
             disc, n_paths=paths.shape[0], method="fixed_lookback"
@@ -59,15 +87,33 @@ class LookbackOptionPricer:
         r: float,
         T: float,
         option_type: str = "call",
+        sigma: float = None,
+        continuity_correction: bool = False,
     ) -> MCResult:
-        """Price a floating-strike lookback option by Monte Carlo."""
+        """Price a floating-strike lookback option by Monte Carlo.
+
+        Parameters
+        ----------
+        sigma : float, optional
+            Volatility; required when ``continuity_correction`` is ``True``.
+        continuity_correction : bool, default False
+            Apply the Broadie-Glasserman-Kou shift to the running extremum.
+        """
         start = time.perf_counter()
         option_type = option_type.lower()
         S_T = paths[:, -1]
+        running_max = paths.max(axis=1)
+        running_min = paths.min(axis=1)
+        if continuity_correction:
+            if sigma is None:
+                raise ValueError("continuity_correction=True requires sigma")
+            factor = self._continuity_factor(sigma, T, paths.shape[1] - 1)
+            running_max = running_max * factor
+            running_min = running_min / factor
         if option_type == "call":
-            payoff = S_T - paths.min(axis=1)
+            payoff = S_T - running_min
         else:
-            payoff = paths.max(axis=1) - S_T
+            payoff = running_max - S_T
         disc = np.exp(-r * T) * payoff
         res = MonteCarloEngine.summarize(
             disc, n_paths=paths.shape[0], method="floating_lookback"
