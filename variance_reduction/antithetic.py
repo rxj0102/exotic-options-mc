@@ -67,7 +67,9 @@ class AntitheticVariates:
         first, second = payoffs[:n], payoffs[n:]
         pair_means = 0.5 * (first + second)
 
-        res = MonteCarloEngine.summarize(pair_means, n_paths=n_total, method="antithetic")
+        res = MonteCarloEngine.summarize(
+            pair_means, n_paths=n_total, method="antithetic"
+        )
         # Compare against the crude estimator using all 2n samples independently.
         crude_var = np.var(payoffs, ddof=1) / n_total
         anti_var = np.var(pair_means, ddof=1) / n

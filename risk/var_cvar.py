@@ -27,7 +27,9 @@ class ExoticVaR:
         Seed for the spot-shock generator.
     """
 
-    def __init__(self, value_fn: Callable[[float], float], seed: Optional[int] = None) -> None:
+    def __init__(
+        self, value_fn: Callable[[float], float], seed: Optional[int] = None
+    ) -> None:
         self.value_fn = value_fn
         self._rng = np.random.default_rng(seed)
 

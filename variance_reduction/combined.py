@@ -144,7 +144,9 @@ class CombinedVR:
         payoffs = disc * np.asarray(payoff_fn(paths), dtype=float)
         n = n_paths
         paired = 0.5 * (payoffs[:n] + payoffs[n:])
-        res = MonteCarloEngine.summarize(paired, n_paths=2 * n_paths, method="qmc+antithetic")
+        res = MonteCarloEngine.summarize(
+            paired, n_paths=2 * n_paths, method="qmc+antithetic"
+        )
         res.elapsed_seconds = time.perf_counter() - start
         return res
 
@@ -180,17 +182,25 @@ class CombinedVR:
         t0 = time.perf_counter()
         crude_paths = gbm.generate_paths(S0, T, r, q, sigma, n_paths, c.n_steps)
         crude_payoffs = disc * payoff(crude_paths)
-        crude = MonteCarloEngine.summarize(crude_payoffs, n_paths=n_paths, method="Crude MC")
+        crude = MonteCarloEngine.summarize(
+            crude_payoffs, n_paths=n_paths, method="Crude MC"
+        )
         crude.elapsed_seconds = time.perf_counter() - t0
         crude_var = np.var(crude_payoffs, ddof=1)
         rows.append(self._row(crude, crude_var, crude_var))
 
         # Antithetic.
         t0 = time.perf_counter()
-        anti_paths = gbm.generate_paths_antithetic(S0, T, r, q, sigma, n_paths, c.n_steps)
+        anti_paths = gbm.generate_paths_antithetic(
+            S0, T, r, q, sigma, n_paths, c.n_steps
+        )
         anti = AntitheticVariates().price(anti_paths, payoff, r, T)
         anti.method = "Antithetic"
-        rows.append(self._row(anti, crude_var, anti.extra["antithetic_variance"] * (2 * n_paths)))
+        rows.append(
+            self._row(
+                anti, crude_var, anti.extra["antithetic_variance"] * (2 * n_paths)
+            )
+        )
 
         # Control variate (geometric Asian) — only meaningful for Asian.
         t0 = time.perf_counter()
@@ -199,7 +209,11 @@ class CombinedVR:
                 crude_paths, S0, K, T, r, q, sigma, c.option_type
             )
             cv.method = "Control Variate"
-            cv_var = crude_var / cv.extra["vr_ratio"] if cv.extra["vr_ratio"] > 0 else crude_var
+            cv_var = (
+                crude_var / cv.extra["vr_ratio"]
+                if cv.extra["vr_ratio"] > 0
+                else crude_var
+            )
             rows.append(self._row(cv, crude_var, cv_var))
 
         # Stratified path sampling via Latin hypercube over the time steps.
@@ -208,23 +222,43 @@ class CombinedVR:
         Z_lhs = strat_sampler.latin_hypercube_normals(n_paths, c.n_steps)
         strat_paths = gbm._paths_from_normals(Z_lhs, S0, T, r, q, sigma)
         strat_payoffs = disc * payoff(strat_paths)
-        strat = MonteCarloEngine.summarize(strat_payoffs, n_paths=n_paths, method="Stratified")
+        strat = MonteCarloEngine.summarize(
+            strat_payoffs, n_paths=n_paths, method="Stratified"
+        )
         strat.elapsed_seconds = time.perf_counter() - t0
         rows.append(self._row(strat, crude_var, np.var(strat_payoffs, ddof=1)))
 
         # Sobol RQMC (variance measured across scrambled replications).
         qmc = QuasiMonteCarlo(seed=self.seed)
         sob = qmc.price_rqmc(
-            payoff, S0, T, r, q, sigma, n_paths // 8, c.n_steps,
-            n_replications=8, sequence="sobol", method="Sobol QMC",
+            payoff,
+            S0,
+            T,
+            r,
+            q,
+            sigma,
+            n_paths // 8,
+            c.n_steps,
+            n_replications=8,
+            sequence="sobol",
+            method="Sobol QMC",
         )
         sob_method_var = (sob.stderr**2) * (n_paths // 8) * 8
         rows.append(self._row(sob, crude_var, sob_method_var))
 
         # Halton RQMC.
         hal = qmc.price_rqmc(
-            payoff, S0, T, r, q, sigma, n_paths // 8, c.n_steps,
-            n_replications=8, sequence="halton", method="Halton QMC",
+            payoff,
+            S0,
+            T,
+            r,
+            q,
+            sigma,
+            n_paths // 8,
+            c.n_steps,
+            n_replications=8,
+            sequence="halton",
+            method="Halton QMC",
         )
         hal_method_var = (hal.stderr**2) * (n_paths // 8) * 8
         rows.append(self._row(hal, crude_var, hal_method_var))
@@ -245,7 +279,11 @@ class CombinedVR:
                 anti_paths, payoff, cv_payoff, geo_analytic, r, T
             )
             combo.method = "Antithetic+CV"
-            combo_var = crude_var / combo.extra["vr_ratio"] if combo.extra["vr_ratio"] > 0 else crude_var
+            combo_var = (
+                crude_var / combo.extra["vr_ratio"]
+                if combo.extra["vr_ratio"] > 0
+                else crude_var
+            )
             rows.append(self._row(combo, crude_var, combo_var))
 
         return pd.DataFrame(rows)

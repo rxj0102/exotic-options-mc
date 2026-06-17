@@ -51,7 +51,13 @@ class MCGreeks:
     # Pathwise (terminal European-style payoffs)
     # ------------------------------------------------------------------
     def delta_pathwise(
-        self, paths: np.ndarray, S0: float, K: float, r: float, T: float, option_type: str = "call"
+        self,
+        paths: np.ndarray,
+        S0: float,
+        K: float,
+        r: float,
+        T: float,
+        option_type: str = "call",
     ):
         """Pathwise delta for a terminal-value payoff.
 
@@ -71,7 +77,14 @@ class MCGreeks:
         return float(est.mean()), float(est.std(ddof=1) / np.sqrt(est.size))
 
     def vega_pathwise(
-        self, paths: np.ndarray, S0: float, K: float, r: float, T: float, sigma: float, option_type: str = "call"
+        self,
+        paths: np.ndarray,
+        S0: float,
+        K: float,
+        r: float,
+        T: float,
+        sigma: float,
+        option_type: str = "call",
     ):
         """Pathwise vega for a terminal-value payoff.
 
@@ -185,7 +198,9 @@ class MCGreeks:
         up_S, dn_S = price_at(S0_=S0 + hS), price_at(S0_=S0 - hS)
         delta = (up_S - dn_S) / (2 * hS)
         gamma = (up_S - 2 * base + dn_S) / hS**2
-        vega = (price_at(sigma_=sigma + hsig) - price_at(sigma_=sigma - hsig)) / (2 * hsig)
+        vega = (price_at(sigma_=sigma + hsig) - price_at(sigma_=sigma - hsig)) / (
+            2 * hsig
+        )
         rho = (price_at(r_=r + hr) - price_at(r_=r - hr)) / (2 * hr)
         # Theta is the negative time derivative (value decays as T shrinks).
         theta = -(price_at(T_=T) - price_at(T_=T - hT)) / hT if T > hT else 0.0

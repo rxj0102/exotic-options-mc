@@ -19,7 +19,13 @@ def test_in_out_parity(market, gbm_paths):
 
 def test_analytical_in_out_parity(market):
     S0, K, q, sigma, r, T, H = (
-        market["S0"], 100.0, market["q"], market["sigma"], market["r"], market["T"], 120.0
+        market["S0"],
+        100.0,
+        market["q"],
+        market["sigma"],
+        market["r"],
+        market["T"],
+        120.0,
     )
     ui = rubinstein_reiner_barrier(S0, K, H, T, r, q, sigma, "up-and-in", "call")
     uo = rubinstein_reiner_barrier(S0, K, H, T, r, q, sigma, "up-and-out", "call")
@@ -29,10 +35,18 @@ def test_analytical_in_out_parity(market):
 
 def test_bridge_matches_rubinstein_reiner(market, gbm_paths):
     S0, K, q, sigma, r, T, H = (
-        market["S0"], 100.0, market["q"], market["sigma"], market["r"], market["T"], 120.0
+        market["S0"],
+        100.0,
+        market["q"],
+        market["sigma"],
+        market["r"],
+        market["T"],
+        120.0,
     )
     pricer = BarrierOptionPricer()
-    mc = pricer.price_mc(gbm_paths, K, H, r, T, "up-and-out", "call", sigma=sigma, brownian_bridge=True)
+    mc = pricer.price_mc(
+        gbm_paths, K, H, r, T, "up-and-out", "call", sigma=sigma, brownian_bridge=True
+    )
     analytic = pricer.price_analytical(S0, K, H, T, r, q, sigma, "up-and-out", "call")
     assert abs(mc.price - analytic) < 3 * mc.stderr + 0.05
 
@@ -50,10 +64,18 @@ def test_up_and_out_monotonic_in_barrier(market, gbm_paths):
 
 def test_bridge_improves_accuracy(market, gbm_paths):
     S0, K, q, sigma, r, T, H = (
-        market["S0"], 100.0, market["q"], market["sigma"], market["r"], market["T"], 120.0
+        market["S0"],
+        100.0,
+        market["q"],
+        market["sigma"],
+        market["r"],
+        market["T"],
+        120.0,
     )
     pricer = BarrierOptionPricer()
     analytic = pricer.price_analytical(S0, K, H, T, r, q, sigma, "up-and-out", "call")
     discrete = pricer.price_mc(gbm_paths, K, H, r, T, "up-and-out", "call").price
-    bridge = pricer.price_mc(gbm_paths, K, H, r, T, "up-and-out", "call", sigma=sigma, brownian_bridge=True).price
+    bridge = pricer.price_mc(
+        gbm_paths, K, H, r, T, "up-and-out", "call", sigma=sigma, brownian_bridge=True
+    ).price
     assert abs(bridge - analytic) < abs(discrete - analytic)

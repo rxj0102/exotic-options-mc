@@ -1,0 +1,97 @@
+{
+  "market": {
+    "S0": 100.0,
+    "K": 100.0,
+    "T": 1.0,
+    "r": 0.05,
+    "q": 0.0,
+    "sigma": 0.2
+  },
+  "n_paths": 100000,
+  "n_steps": 252,
+  "validation": [
+    {
+      "instrument": "Geometric Asian call",
+      "mc_price": 5.5624,
+      "stderr": 0.0245,
+      "analytical": 5.5655,
+      "deviation_bps": -5.5,
+      "z_score": -0.13
+    },
+    {
+      "instrument": "Up-and-out barrier call",
+      "mc_price": 1.1831,
+      "stderr": 0.0098,
+      "analytical": 1.1761,
+      "deviation_bps": 60.0,
+      "z_score": 0.72
+    },
+    {
+      "instrument": "Floating lookback call",
+      "mc_price": 17.2782,
+      "stderr": 0.0463,
+      "analytical": 17.2168,
+      "deviation_bps": 35.7,
+      "z_score": 1.33
+    }
+  ],
+  "efficiency_table": [
+    {
+      "Method": "Crude MC",
+      "Price": 5.735704,
+      "StdErr": 0.035599,
+      "CI_Width": 0.139544,
+      "VR_Ratio": 1.0,
+      "Computation_Time": 0.4536
+    },
+    {
+      "Method": "Antithetic",
+      "Price": 5.808064,
+      "StdErr": 0.01766,
+      "CI_Width": 0.069227,
+      "VR_Ratio": 2.03,
+      "Computation_Time": 0.0287
+    },
+    {
+      "Method": "Control Variate",
+      "Price": 5.78233,
+      "StdErr": 0.000974,
+      "CI_Width": 0.003817,
+      "VR_Ratio": 1336.65,
+      "Computation_Time": 0.001
+    },
+    {
+      "Method": "Stratified",
+      "Price": 5.807517,
+      "StdErr": 0.035821,
+      "CI_Width": 0.140418,
+      "VR_Ratio": 0.99,
+      "Computation_Time": 1.531
+    },
+    {
+      "Method": "Sobol QMC",
+      "Price": 5.781218,
+      "StdErr": 0.001063,
+      "CI_Width": 0.004166,
+      "VR_Ratio": 1121.93,
+      "Computation_Time": 0.8392
+    },
+    {
+      "Method": "Halton QMC",
+      "Price": 5.782864,
+      "StdErr": 0.00135,
+      "CI_Width": 0.005291,
+      "VR_Ratio": 695.65,
+      "Computation_Time": 1.2431
+    },
+    {
+      "Method": "Antithetic+CV",
+      "Price": 5.782399,
+      "StdErr": 0.000732,
+      "CI_Width": 0.00287,
+      "VR_Ratio": 1206.87,
+      "Computation_Time": 0.1571
+    }
+  ],
+  "bsm_call": 10.450583572185565
+}

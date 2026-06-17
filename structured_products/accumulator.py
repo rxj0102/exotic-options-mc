@@ -80,7 +80,9 @@ class FXAccumulatorPricer:
         disc = np.exp(-r_d * dt * np.arange(1, n_steps + 1))
         path_pv = (daily_pnl * disc).sum(axis=1)
 
-        res = MonteCarloEngine.summarize(path_pv, n_paths=n_paths, method="fx_accumulator")
+        res = MonteCarloEngine.summarize(
+            path_pv, n_paths=n_paths, method="fx_accumulator"
+        )
         res.extra = {
             "knockout_probability": float((knocked[:, -1]).mean()),
             "payoff_samples": path_pv,

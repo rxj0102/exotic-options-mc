@@ -123,9 +123,7 @@ class HestonSimulator(MonteCarloEngine):
 
         return S, V
 
-    def feller_condition(
-        self, kappa: float, theta: float, xi: float
-    ) -> bool:
+    def feller_condition(self, kappa: float, theta: float, xi: float) -> bool:
         """Return ``True`` when the Feller condition holds.
 
         Parameters

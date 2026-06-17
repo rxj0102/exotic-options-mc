@@ -68,7 +68,9 @@ class CapitalProtectedPricer:
         payoff = floor + units * np.maximum(S_T - K, 0.0)
         disc = np.exp(-r * T) * payoff
 
-        res = MonteCarloEngine.summarize(disc, n_paths=n_paths, method="capital_protected")
+        res = MonteCarloEngine.summarize(
+            disc, n_paths=n_paths, method="capital_protected"
+        )
         bond_value = float(floor * np.exp(-r * T))
         option_value = float(np.exp(-r * T) * (units * np.maximum(S_T - K, 0.0)).mean())
         res.extra = {

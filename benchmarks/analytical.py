@@ -113,7 +113,9 @@ def bsm_greeks(
     pdf = _NORM.pdf(d1)
     sqrtT = np.sqrt(T)
 
-    gamma = disc_q * pdf / (S0 * sigma * sqrtT) if (S0 > 0 and sigma > 0 and T > 0) else 0.0
+    gamma = (
+        disc_q * pdf / (S0 * sigma * sqrtT) if (S0 > 0 and sigma > 0 and T > 0) else 0.0
+    )
     vega = S0 * disc_q * pdf * sqrtT
     if option_type == "call":
         delta = disc_q * _NORM.cdf(d1)

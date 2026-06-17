@@ -46,9 +46,7 @@ class PathVisualizer:
         idx = np.linspace(0, paths.shape[0] - 1, n).astype(int)
         return paths[idx]
 
-    def terminal_histogram_data(
-        self, paths: np.ndarray, n_bins: int = 60
-    ) -> dict:
+    def terminal_histogram_data(self, paths: np.ndarray, n_bins: int = 60) -> dict:
         """Histogram of terminal values with a fitted log-normal overlay.
 
         Returns

@@ -5,7 +5,11 @@ from pathlib import Path
 from setuptools import find_packages, setup
 
 ROOT = Path(__file__).parent
-LONG_DESCRIPTION = (ROOT / "README.md").read_text(encoding="utf-8") if (ROOT / "README.md").exists() else ""
+LONG_DESCRIPTION = (
+    (ROOT / "README.md").read_text(encoding="utf-8")
+    if (ROOT / "README.md").exists()
+    else ""
+)
 
 setup(
     name="exotic-options-mc",

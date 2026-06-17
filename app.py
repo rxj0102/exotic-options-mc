@@ -37,7 +37,9 @@ from variance_reduction.combined import CombinedVR, Contract
 
 warnings.filterwarnings("ignore")
 
-st.set_page_config(page_title="Exotic Options MC", layout="wide", initial_sidebar_state="expanded")
+st.set_page_config(
+    page_title="Exotic Options MC", layout="wide", initial_sidebar_state="expanded"
+)
 
 # Dark Plotly theme is applied inside the plotting helpers.
 st.markdown(
@@ -85,7 +87,9 @@ with st.sidebar:
     S0 = st.number_input("Spot S₀", value=100.0, min_value=1.0)
     r = st.number_input("Risk-free rate r", value=0.05, step=0.01, format="%.4f")
     q = st.number_input("Dividend yield q", value=0.0, step=0.01, format="%.4f")
-    sigma = st.number_input("Volatility σ", value=0.20, min_value=0.001, step=0.01, format="%.4f")
+    sigma = st.number_input(
+        "Volatility σ", value=0.20, min_value=0.001, step=0.01, format="%.4f"
+    )
     T = st.number_input("Maturity T (years)", value=1.0, min_value=0.01, step=0.25)
     seed = st.number_input("Random seed", value=42, step=1)
     n_paths = st.select_slider(
@@ -116,21 +120,44 @@ with tabs[0]:
 
     if st.button("Simulate", key="sim_paths"):
         if model == "GBM":
-            paths = GBMSimulator(seed=seed).generate_paths(S0, T, r, q, sigma, n_paths, n_steps)
+            paths = GBMSimulator(seed=seed).generate_paths(
+                S0, T, r, q, sigma, n_paths, n_steps
+            )
         elif model == "Heston":
             paths, _ = HestonSimulator(seed=seed).generate_paths(
-                S0, T, r, q, extra["V0"], extra["kappa"], extra["theta"], extra["xi"], extra["rho"],
-                n_paths, n_steps,
+                S0,
+                T,
+                r,
+                q,
+                extra["V0"],
+                extra["kappa"],
+                extra["theta"],
+                extra["xi"],
+                extra["rho"],
+                n_paths,
+                n_steps,
             )
         else:
             paths = MertonJumpDiffusion(seed=seed).generate_paths(
-                S0, T, r, q, sigma, extra["lambda_"], extra["mu_J"], extra["sigma_J"], n_paths, n_steps,
+                S0,
+                T,
+                r,
+                q,
+                sigma,
+                extra["lambda_"],
+                extra["mu_J"],
+                extra["sigma_J"],
+                n_paths,
+                n_steps,
             )
 
         pv = PathVisualizer()
         fan = pv.fan_chart_data(paths)
         sample = pv.path_sample_data(paths, 50)
-        st.plotly_chart(plotting.fan_chart(fan, sample, f"{model} Path Fan Chart"), use_container_width=True)
+        st.plotly_chart(
+            plotting.fan_chart(fan, sample, f"{model} Path Fan Chart"),
+            use_container_width=True,
+        )
 
         stats = pv.path_statistics(paths)
         st.dataframe(pd.DataFrame([stats]), use_container_width=True)
@@ -139,8 +166,18 @@ with tabs[0]:
         import plotly.graph_objects as go
 
         fig = go.Figure()
-        fig.add_bar(x=hist["bin_centers"], y=hist["density"], name="terminal", marker_color="#50a0ff")
-        fig.add_scatter(x=hist["fit_x"], y=hist["fit_y"], name="lognormal fit", line=dict(color="orange"))
+        fig.add_bar(
+            x=hist["bin_centers"],
+            y=hist["density"],
+            name="terminal",
+            marker_color="#50a0ff",
+        )
+        fig.add_scatter(
+            x=hist["fit_x"],
+            y=hist["fit_y"],
+            name="lognormal fit",
+            line=dict(color="orange"),
+        )
         fig.update_layout(template="plotly_dark", title="Terminal distribution")
         st.plotly_chart(fig, use_container_width=True)
 
@@ -163,37 +200,60 @@ with tabs[1]:
     result = None
     analytic = None
     if family == "Asian":
-        freq = st.selectbox("Averaging frequency", ["continuous", "daily", "weekly", "monthly"])
+        freq = st.selectbox(
+            "Averaging frequency", ["continuous", "daily", "weekly", "monthly"]
+        )
         floating = st.checkbox("Floating strike")
         otype = st.radio("Type", ["call", "put"], horizontal=True)
         ap = AsianOptionPricer(freq)
         result = ap.price_arithmetic(paths, K, r, T, otype, floating)
         if not floating:
             analytic = ap.price_geometric_analytical(S0, K, T, r, q, sigma, otype)
-            st.caption("Analytical shown is the *geometric* Asian (lower bound for arithmetic).")
+            st.caption(
+                "Analytical shown is the *geometric* Asian (lower bound for arithmetic)."
+            )
     elif family == "Lookback":
         floating = st.checkbox("Floating strike", value=True)
         otype = st.radio("Type", ["call", "put"], horizontal=True)
         lb = LookbackOptionPricer()
         if floating:
-            result = lb.price_floating_strike(paths, r, T, otype, sigma=sigma, continuity_correction=True)
+            result = lb.price_floating_strike(
+                paths, r, T, otype, sigma=sigma, continuity_correction=True
+            )
             analytic = (
                 lb.floating_call_analytical(S0, T, r, q, sigma)
                 if otype == "call"
                 else lb.floating_put_analytical(S0, T, r, q, sigma)
             )
         else:
-            result = lb.price_fixed_strike(paths, K, r, T, otype, sigma=sigma, continuity_correction=True)
+            result = lb.price_fixed_strike(
+                paths, K, r, T, otype, sigma=sigma, continuity_correction=True
+            )
     elif family == "Barrier":
-        bt = st.selectbox("Barrier type", ["up-and-out", "up-and-in", "down-and-out", "down-and-in"])
+        bt = st.selectbox(
+            "Barrier type", ["up-and-out", "up-and-in", "down-and-out", "down-and-in"]
+        )
         otype = st.radio("Type", ["call", "put"], horizontal=True)
         H = st.number_input("Barrier H", value=120.0)
         rebate = st.number_input("Rebate", value=0.0)
         bp = BarrierOptionPricer()
-        result = bp.price_mc(paths, K, H, r, T, bt, otype, rebate=rebate, sigma=sigma, brownian_bridge=True)
+        result = bp.price_mc(
+            paths,
+            K,
+            H,
+            r,
+            T,
+            bt,
+            otype,
+            rebate=rebate,
+            sigma=sigma,
+            brownian_bridge=True,
+        )
         analytic = bp.price_analytical(S0, K, H, T, r, q, sigma, bt, otype, rebate)
     else:  # Digital
-        sub = st.selectbox("Subtype", ["cash_or_nothing", "asset_or_nothing", "one_touch", "no_touch"])
+        sub = st.selectbox(
+            "Subtype", ["cash_or_nothing", "asset_or_nothing", "one_touch", "no_touch"]
+        )
         otype = st.radio("Type", ["call", "put"], horizontal=True)
         H = st.number_input("Barrier H (touch only)", value=120.0)
         dp = DigitalOptionPricer()
@@ -213,11 +273,17 @@ with tabs[1]:
         # Payoff diagram at expiry.
         ST = np.linspace(S0 * 0.4, S0 * 1.8, 200)
         if family in ("Asian",) or (family == "Lookback"):
-            payoff = np.maximum(ST - K, 0.0) if otype == "call" else np.maximum(K - ST, 0.0)
+            payoff = (
+                np.maximum(ST - K, 0.0) if otype == "call" else np.maximum(K - ST, 0.0)
+            )
         elif family == "Barrier":
-            payoff = np.maximum(ST - K, 0.0) if otype == "call" else np.maximum(K - ST, 0.0)
+            payoff = (
+                np.maximum(ST - K, 0.0) if otype == "call" else np.maximum(K - ST, 0.0)
+            )
         else:
-            payoff = (ST > K).astype(float) if otype == "call" else (ST < K).astype(float)
+            payoff = (
+                (ST > K).astype(float) if otype == "call" else (ST < K).astype(float)
+            )
         st.plotly_chart(plotting.payoff_diagram(ST, payoff), use_container_width=True)
 
 
@@ -227,17 +293,25 @@ with tabs[1]:
 with tabs[2]:
     st.subheader("Variance Reduction Lab")
     st.caption("Benchmarked on an at-the-money arithmetic Asian call.")
-    vr_paths = st.select_slider("Paths (per method)", options=[10_000, 20_000, 50_000], value=20_000, key="vr_n")
+    vr_paths = st.select_slider(
+        "Paths (per method)", options=[10_000, 20_000, 50_000], value=20_000, key="vr_n"
+    )
     if st.button("Run all methods", key="run_vr"):
-        contract = Contract(S0=S0, K=K if "K" in dir() else 100.0, T=T, r=r, q=q, sigma=sigma)
+        contract = Contract(
+            S0=S0, K=K if "K" in dir() else 100.0, T=T, r=r, q=q, sigma=sigma
+        )
         table = CombinedVR(seed=seed).efficiency_table(contract, n_paths=vr_paths)
         st.dataframe(table, use_container_width=True)
         st.plotly_chart(
-            plotting.bar_comparison(table["Method"], table["StdErr"], "Standard Error by Method", "StdErr"),
+            plotting.bar_comparison(
+                table["Method"], table["StdErr"], "Standard Error by Method", "StdErr"
+            ),
             use_container_width=True,
         )
         best = table.loc[table["VR_Ratio"].idxmax()]
-        st.success(f"**{best['Method']}** delivers a {best['VR_Ratio']:.0f}× variance reduction vs crude MC.")
+        st.success(
+            f"**{best['Method']}** delivers a {best['VR_Ratio']:.0f}× variance reduction vs crude MC."
+        )
 
 
 # ----------------------------------------------------------------------------
@@ -255,13 +329,19 @@ with tabs[3]:
 
         ca = ConvergenceAnalyzer()
         df = ca.price_vs_paths(pricer, [1_000, 5_000, 10_000, 50_000, 100_000, 500_000])
-        st.plotly_chart(plotting.convergence_plot(df, title="Price vs n_paths"), use_container_width=True)
+        st.plotly_chart(
+            plotting.convergence_plot(df, title="Price vs n_paths"),
+            use_container_width=True,
+        )
         rate = ca.convergence_rate(df)
         st.metric("Fitted convergence rate", f"{rate:.3f}", "theory ≈ -0.5")
         prec = pd.DataFrame(
             {
                 "Target StdErr": [0.10, 0.05, 0.01],
-                "Paths needed": [ca.path_count_for_precision(pricer, t, 10_000) for t in (0.10, 0.05, 0.01)],
+                "Paths needed": [
+                    ca.path_count_for_precision(pricer, t, 10_000)
+                    for t in (0.10, 0.05, 0.01)
+                ],
             }
         )
         st.dataframe(prec, use_container_width=True)
@@ -284,9 +364,15 @@ with tabs[4]:
         pnl = ev.pnl_distribution_data(S0, sigma, r, horizon, 20_000)
         import plotly.graph_objects as go
 
-        fig = go.Figure(go.Bar(x=pnl["bin_centers"], y=pnl["counts"], marker_color="#50a0ff"))
-        fig.add_vline(x=-pnl["var"], line_dash="dash", line_color="orange", annotation_text="VaR")
-        fig.add_vline(x=-pnl["cvar"], line_dash="dot", line_color="red", annotation_text="CVaR")
+        fig = go.Figure(
+            go.Bar(x=pnl["bin_centers"], y=pnl["counts"], marker_color="#50a0ff")
+        )
+        fig.add_vline(
+            x=-pnl["var"], line_dash="dash", line_color="orange", annotation_text="VaR"
+        )
+        fig.add_vline(
+            x=-pnl["cvar"], line_dash="dot", line_color="red", annotation_text="CVaR"
+        )
         fig.update_layout(template="plotly_dark", title="P&L distribution")
         st.plotly_chart(fig, use_container_width=True)
 
@@ -295,7 +381,16 @@ with tabs[4]:
         gs = mg.all_greeks(S0, K_risk, T, r, q, sigma, payoff_fn, n_paths=100_000)
         st.dataframe(
             pd.DataFrame(
-                [{"Delta": gs.delta, "Gamma": gs.gamma, "Vega": gs.vega, "Theta": gs.theta, "Rho": gs.rho, "Method": gs.method}]
+                [
+                    {
+                        "Delta": gs.delta,
+                        "Gamma": gs.gamma,
+                        "Vega": gs.vega,
+                        "Theta": gs.theta,
+                        "Rho": gs.rho,
+                        "Method": gs.method,
+                    }
+                ]
             ),
             use_container_width=True,
         )
@@ -321,14 +416,32 @@ with tabs[5]:
         tenor = st.slider("Tenor (years)", 1, 5, 3)
         if st.button("Price autocallable", key="run_ac"):
             res = AutocallablePricer(seed=seed).price(
-                S0, ac_barrier, coupon, cap_barrier, float(tenor),
-                list(range(1, tenor + 1)), r, q, sigma, n_paths=50_000,
+                S0,
+                ac_barrier,
+                coupon,
+                cap_barrier,
+                float(tenor),
+                list(range(1, tenor + 1)),
+                r,
+                q,
+                sigma,
+                n_paths=50_000,
             )
             st.metric("Fair value", f"{res.price:.3f}")
             st.metric("Expected life (yrs)", f"{res.extra['expected_life']:.2f}")
-            probs = pd.DataFrame({"Obs date (yr)": res.extra["obs_dates"], "Autocall prob": res.extra["autocall_probs"]})
+            probs = pd.DataFrame(
+                {
+                    "Obs date (yr)": res.extra["obs_dates"],
+                    "Autocall prob": res.extra["autocall_probs"],
+                }
+            )
             st.plotly_chart(
-                plotting.bar_comparison([str(d) for d in probs["Obs date (yr)"]], probs["Autocall prob"], "Autocall probability", "P"),
+                plotting.bar_comparison(
+                    [str(d) for d in probs["Obs date (yr)"]],
+                    probs["Autocall prob"],
+                    "Autocall probability",
+                    "P",
+                ),
                 use_container_width=True,
             )
     else:
@@ -337,15 +450,21 @@ with tabs[5]:
         rebate = c2.number_input("Rebate", value=5.0)
         Ksf = c3.number_input("Strike", value=100.0, key="ksf")
         if st.button("Price shark fin", key="run_sf"):
-            res = SharkFinPricer(seed=seed).price(S0, Ksf, barrier, rebate, T, r, q, sigma, n_paths=50_000)
+            res = SharkFinPricer(seed=seed).price(
+                S0, Ksf, barrier, rebate, T, r, q, sigma, n_paths=50_000
+            )
             st.metric("Fair value", f"{res.price:.3f}")
             comp = res.extra["components"]
             import plotly.graph_objects as go
 
-            fig = go.Figure(go.Pie(labels=list(comp.keys()), values=list(comp.values())))
+            fig = go.Figure(
+                go.Pie(labels=list(comp.keys()), values=list(comp.values()))
+            )
             fig.update_layout(template="plotly_dark", title="Component breakdown")
             st.plotly_chart(fig, use_container_width=True)
-            st.caption(f"Knock-out probability: {res.extra['knockout_probability']:.1%}")
+            st.caption(
+                f"Knock-out probability: {res.extra['knockout_probability']:.1%}"
+            )
 
 
 # ----------------------------------------------------------------------------
@@ -361,16 +480,26 @@ with tabs[6]:
     )
     st.markdown("### Variance-reduction estimators")
     st.latex(r"\hat P_{\text{anti}} = \tfrac12\big(f(Z) + f(-Z)\big)")
-    st.latex(r"\hat P_{\text{cv}} = \bar X - \beta\,(\bar C - \mathbb{E}[C]),\quad \beta = \frac{\operatorname{Cov}(X,C)}{\operatorname{Var}(C)}")
-    st.latex(r"\hat P_{\text{IS}} = \mathbb{E}^{\tilde P}\!\big[f(S)\,e^{-\theta W_T - \tfrac12\theta^2 T}\big]")
+    st.latex(
+        r"\hat P_{\text{cv}} = \bar X - \beta\,(\bar C - \mathbb{E}[C]),\quad \beta = \frac{\operatorname{Cov}(X,C)}{\operatorname{Var}(C)}"
+    )
+    st.latex(
+        r"\hat P_{\text{IS}} = \mathbb{E}^{\tilde P}\!\big[f(S)\,e^{-\theta W_T - \tfrac12\theta^2 T}\big]"
+    )
     st.markdown("### Convergence theory")
-    st.latex(r"\text{Crude MC: } O(N^{-1/2}) \qquad \text{QMC: } O\!\big((\log N)^d / N\big)")
+    st.latex(
+        r"\text{Crude MC: } O(N^{-1/2}) \qquad \text{QMC: } O\!\big((\log N)^d / N\big)"
+    )
     st.markdown("### Model comparison")
     st.dataframe(
         pd.DataFrame(
             {
                 "Model": ["GBM", "Heston", "Merton Jump-Diffusion"],
-                "Vol dynamics": ["constant", "stochastic (mean-reverting)", "constant + jumps"],
+                "Vol dynamics": [
+                    "constant",
+                    "stochastic (mean-reverting)",
+                    "constant + jumps",
+                ],
                 "Key params": ["σ", "κ, θ, ξ, ρ, V₀", "λ, μ_J, σ_J"],
                 "Use case": ["baseline", "vol smile / skew", "crash risk / fat tails"],
             }

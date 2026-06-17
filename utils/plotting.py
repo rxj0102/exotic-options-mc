@@ -27,7 +27,11 @@ def _go():
     return go
 
 
-def fan_chart(fan_data: dict, sample_paths: Optional[np.ndarray] = None, title: str = "Path Fan Chart"):
+def fan_chart(
+    fan_data: dict,
+    sample_paths: Optional[np.ndarray] = None,
+    title: str = "Path Fan Chart",
+):
     """Build a percentile fan chart with optional raw-path overlay.
 
     Parameters
@@ -47,7 +51,9 @@ def fan_chart(fan_data: dict, sample_paths: Optional[np.ndarray] = None, title: 
     band_pairs = [("p5", "p95"), ("p25", "p75")]
     for lo, hi in band_pairs:
         if lo in fan_data and hi in fan_data:
-            fig.add_trace(go.Scatter(x=t, y=fan_data[hi], line=dict(width=0), showlegend=False))
+            fig.add_trace(
+                go.Scatter(x=t, y=fan_data[hi], line=dict(width=0), showlegend=False)
+            )
             fig.add_trace(
                 go.Scatter(
                     x=t,
@@ -59,20 +65,31 @@ def fan_chart(fan_data: dict, sample_paths: Optional[np.ndarray] = None, title: 
                 )
             )
     if "p50" in fan_data:
-        fig.add_trace(go.Scatter(x=t, y=fan_data["p50"], line=dict(color="#50a0ff"), name="median"))
+        fig.add_trace(
+            go.Scatter(
+                x=t, y=fan_data["p50"], line=dict(color="#50a0ff"), name="median"
+            )
+        )
     if sample_paths is not None:
         for path in sample_paths:
             fig.add_trace(
                 go.Scatter(
-                    x=t, y=path, line=dict(width=0.5, color="rgba(200,200,200,0.25)"),
-                    showlegend=False, hoverinfo="skip",
+                    x=t,
+                    y=path,
+                    line=dict(width=0.5, color="rgba(200,200,200,0.25)"),
+                    showlegend=False,
+                    hoverinfo="skip",
                 )
             )
-    fig.update_layout(template=_TEMPLATE, title=title, xaxis_title="Time step", yaxis_title="Price")
+    fig.update_layout(
+        template=_TEMPLATE, title=title, xaxis_title="Time step", yaxis_title="Price"
+    )
     return fig
 
 
-def convergence_plot(df, analytical: Optional[float] = None, title: str = "Convergence"):
+def convergence_plot(
+    df, analytical: Optional[float] = None, title: str = "Convergence"
+):
     """Plot price with a 95% CI band against the path count.
 
     Parameters
@@ -88,24 +105,46 @@ def convergence_plot(df, analytical: Optional[float] = None, title: str = "Conve
     """
     go = _go()
     fig = go.Figure()
-    fig.add_trace(go.Scatter(x=df["n_paths"], y=df["ci_upper"], line=dict(width=0), showlegend=False))
     fig.add_trace(
         go.Scatter(
-            x=df["n_paths"], y=df["ci_lower"], fill="tonexty",
-            fillcolor="rgba(80,160,255,0.2)", line=dict(width=0), name="95% CI",
+            x=df["n_paths"], y=df["ci_upper"], line=dict(width=0), showlegend=False
         )
     )
-    fig.add_trace(go.Scatter(x=df["n_paths"], y=df["price"], mode="lines+markers", name="MC price"))
+    fig.add_trace(
+        go.Scatter(
+            x=df["n_paths"],
+            y=df["ci_lower"],
+            fill="tonexty",
+            fillcolor="rgba(80,160,255,0.2)",
+            line=dict(width=0),
+            name="95% CI",
+        )
+    )
+    fig.add_trace(
+        go.Scatter(
+            x=df["n_paths"], y=df["price"], mode="lines+markers", name="MC price"
+        )
+    )
     if analytical is not None:
-        fig.add_hline(y=analytical, line_dash="dash", line_color="orange", annotation_text="analytical")
+        fig.add_hline(
+            y=analytical,
+            line_dash="dash",
+            line_color="orange",
+            annotation_text="analytical",
+        )
     fig.update_layout(
-        template=_TEMPLATE, title=title, xaxis_title="n_paths", yaxis_title="Price",
+        template=_TEMPLATE,
+        title=title,
+        xaxis_title="n_paths",
+        yaxis_title="Price",
         xaxis_type="log",
     )
     return fig
 
 
-def payoff_diagram(S_T: Sequence[float], payoff: Sequence[float], title: str = "Payoff at Expiry"):
+def payoff_diagram(
+    S_T: Sequence[float], payoff: Sequence[float], title: str = "Payoff at Expiry"
+):
     """Line chart of payoff versus terminal spot.
 
     Returns
@@ -115,11 +154,15 @@ def payoff_diagram(S_T: Sequence[float], payoff: Sequence[float], title: str = "
     go = _go()
     fig = go.Figure()
     fig.add_trace(go.Scatter(x=S_T, y=payoff, mode="lines", line=dict(color="#50a0ff")))
-    fig.update_layout(template=_TEMPLATE, title=title, xaxis_title="S_T", yaxis_title="Payoff")
+    fig.update_layout(
+        template=_TEMPLATE, title=title, xaxis_title="S_T", yaxis_title="Payoff"
+    )
     return fig
 
 
-def bar_comparison(labels: Sequence[str], values: Sequence[float], title: str = "", y_title: str = ""):
+def bar_comparison(
+    labels: Sequence[str], values: Sequence[float], title: str = "", y_title: str = ""
+):
     """Simple bar chart for comparing methods.
 
     Returns

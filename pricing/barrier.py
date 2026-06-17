@@ -120,7 +120,9 @@ class BarrierOptionPricer:
 
         S_T = paths[:, -1]
         vanilla = (
-            np.maximum(S_T - K, 0.0) if option_type == "call" else np.maximum(K - S_T, 0.0)
+            np.maximum(S_T - K, 0.0)
+            if option_type == "call"
+            else np.maximum(K - S_T, 0.0)
         )
         is_up = "up" in barrier_type
         is_in = "in" in barrier_type
@@ -207,7 +209,9 @@ class BarrierOptionPricer:
         breached = (paths.min(axis=1) <= H_lower) | (paths.max(axis=1) >= H_upper)
         S_T = paths[:, -1]
         vanilla = (
-            np.maximum(S_T - K, 0.0) if option_type == "call" else np.maximum(K - S_T, 0.0)
+            np.maximum(S_T - K, 0.0)
+            if option_type == "call"
+            else np.maximum(K - S_T, 0.0)
         )
         active = breached if knock == "in" else ~breached
         disc = np.exp(-r * T) * active.astype(float) * vanilla

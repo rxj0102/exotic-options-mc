@@ -25,9 +25,7 @@ def standard_error(x: np.ndarray) -> float:
     return float(np.std(x, ddof=1) / np.sqrt(x.size))
 
 
-def confidence_interval(
-    x: np.ndarray, z: float = _Z95
-) -> Tuple[float, float]:
+def confidence_interval(x: np.ndarray, z: float = _Z95) -> Tuple[float, float]:
     """Normal-approximation confidence interval for the mean.
 
     Returns

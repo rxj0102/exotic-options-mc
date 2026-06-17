@@ -3,12 +3,8 @@
 from .analytical import bsm_d1_d2, bsm_greeks, bsm_price
 from .asian_geometric import kemna_vorst_geometric_asian
 from .barrier_analytical import rubinstein_reiner_barrier
-from .digital_analytical import (
-    asset_or_nothing,
-    cash_or_nothing,
-    no_touch,
-    one_touch,
-)
+from .digital_analytical import (asset_or_nothing, cash_or_nothing, no_touch,
+                                 one_touch)
 
 __all__ = [
     "bsm_price",

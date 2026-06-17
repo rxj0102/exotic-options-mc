@@ -6,12 +6,8 @@ import time
 
 import numpy as np
 
-from benchmarks.digital_analytical import (
-    asset_or_nothing,
-    cash_or_nothing,
-    no_touch,
-    one_touch,
-)
+from benchmarks.digital_analytical import (asset_or_nothing, cash_or_nothing,
+                                           no_touch, one_touch)
 from simulation.base import MCResult, MonteCarloEngine
 
 __all__ = ["DigitalOptionPricer"]

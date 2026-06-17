@@ -7,7 +7,9 @@ from simulation.gbm import GBMSimulator
 
 def test_paths_start_at_S0(market):
     g = GBMSimulator(seed=1)
-    paths = g.generate_paths(market["S0"], 1.0, 0.05, 0.0, 0.2, n_paths=1000, n_steps=50)
+    paths = g.generate_paths(
+        market["S0"], 1.0, 0.05, 0.0, 0.2, n_paths=1000, n_steps=50
+    )
     assert np.allclose(paths[:, 0], market["S0"])
     assert paths.shape == (1000, 51)
 
@@ -28,7 +30,9 @@ def test_log_variance(market, gbm_paths):
 
 def test_antithetic_pairing(market):
     g = GBMSimulator(seed=7)
-    paths = g.generate_paths_antithetic(market["S0"], 1.0, 0.05, 0.0, 0.2, n_paths=500, n_steps=20)
+    paths = g.generate_paths_antithetic(
+        market["S0"], 1.0, 0.05, 0.0, 0.2, n_paths=500, n_steps=20
+    )
     assert paths.shape == (1000, 21)
     n = 500
     # Recover the implied normals; the two halves should be exact negatives.

@@ -18,8 +18,13 @@ def gbm_paths(market):
     """A reusable, reproducible set of GBM paths (100k x 252)."""
     g = GBMSimulator(seed=12345)
     return g.generate_paths(
-        market["S0"], market["T"], market["r"], market["q"], market["sigma"],
-        n_paths=100_000, n_steps=252,
+        market["S0"],
+        market["T"],
+        market["r"],
+        market["q"],
+        market["sigma"],
+        n_paths=100_000,
+        n_steps=252,
     )
 
 

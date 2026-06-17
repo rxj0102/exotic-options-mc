@@ -104,7 +104,9 @@ class ImportanceSampling:
             payoff = np.maximum(K - S_T, 0.0)
         weighted = disc * payoff * L
 
-        res = MonteCarloEngine.summarize(weighted, n_paths=n_paths, method="importance_sampling")
+        res = MonteCarloEngine.summarize(
+            weighted, n_paths=n_paths, method="importance_sampling"
+        )
 
         # Crude comparison (unshifted) for the VR ratio.
         S_T_crude = S0 * np.exp((r - q - 0.5 * sigma**2) * T + sigma * sqrtT * Z)
@@ -172,7 +174,9 @@ class ImportanceSampling:
 
         S_T = paths[:, -1]
         vanilla = (
-            np.maximum(S_T - K, 0.0) if option_type == "call" else np.maximum(K - S_T, 0.0)
+            np.maximum(S_T - K, 0.0)
+            if option_type == "call"
+            else np.maximum(K - S_T, 0.0)
         )
         if "up" in barrier_type:
             breached = paths.max(axis=1) >= H

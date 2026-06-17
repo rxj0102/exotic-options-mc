@@ -51,9 +51,7 @@ class PathManager:
     ) -> None:
         key = model.lower()
         if key not in _MODELS:
-            raise ValueError(
-                f"Unknown model '{model}'. Choose from {sorted(_MODELS)}."
-            )
+            raise ValueError(f"Unknown model '{model}'. Choose from {sorted(_MODELS)}.")
         self.model = key
         self.engine: MonteCarloEngine = _MODELS[key](
             seed=seed, n_paths=n_paths, n_steps=n_steps
@@ -63,9 +61,7 @@ class PathManager:
         """Reseed the underlying engine."""
         self.engine.set_seed(seed)
 
-    def generate(
-        self, **kwargs
-    ) -> Union[np.ndarray, Tuple[np.ndarray, np.ndarray]]:
+    def generate(self, **kwargs) -> Union[np.ndarray, Tuple[np.ndarray, np.ndarray]]:
         """Dispatch to the underlying engine's ``generate_paths``.
 
         All keyword arguments are forwarded verbatim. For the Heston model

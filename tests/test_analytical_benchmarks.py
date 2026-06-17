@@ -22,7 +22,9 @@ def test_put_call_parity():
 def test_rubinstein_reiner_parity():
     args = dict(S0=100, K=100, H=120, T=1.0, r=0.05, q=0.0, sigma=0.2)
     ui = rubinstein_reiner_barrier(**args, barrier_type="up-and-in", option_type="call")
-    uo = rubinstein_reiner_barrier(**args, barrier_type="up-and-out", option_type="call")
+    uo = rubinstein_reiner_barrier(
+        **args, barrier_type="up-and-out", option_type="call"
+    )
     vanilla = bsm_price(100, 100, 1.0, 0.05, 0.0, 0.2, "call")
     assert abs((ui + uo) - vanilla) < 1e-8
 

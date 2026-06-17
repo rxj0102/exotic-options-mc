@@ -93,17 +93,26 @@ def rubinstein_reiner_barrier(
     eq = np.exp((b - r) * T)
     er = np.exp(-r * T)
 
-    A = phi * S0 * eq * _NORM.cdf(phi * x1) - phi * K * er * _NORM.cdf(phi * x1 - phi * vol)
-    B = phi * S0 * eq * _NORM.cdf(phi * x2) - phi * K * er * _NORM.cdf(phi * x2 - phi * vol)
-    C = phi * S0 * eq * HS ** (2 * (mu + 1)) * _NORM.cdf(eta * y1) - phi * K * er * HS ** (
-        2 * mu
-    ) * _NORM.cdf(eta * y1 - eta * vol)
-    D = phi * S0 * eq * HS ** (2 * (mu + 1)) * _NORM.cdf(eta * y2) - phi * K * er * HS ** (
-        2 * mu
-    ) * _NORM.cdf(eta * y2 - eta * vol)
+    A = phi * S0 * eq * _NORM.cdf(phi * x1) - phi * K * er * _NORM.cdf(
+        phi * x1 - phi * vol
+    )
+    B = phi * S0 * eq * _NORM.cdf(phi * x2) - phi * K * er * _NORM.cdf(
+        phi * x2 - phi * vol
+    )
+    C = phi * S0 * eq * HS ** (2 * (mu + 1)) * _NORM.cdf(
+        eta * y1
+    ) - phi * K * er * HS ** (2 * mu) * _NORM.cdf(eta * y1 - eta * vol)
+    D = phi * S0 * eq * HS ** (2 * (mu + 1)) * _NORM.cdf(
+        eta * y2
+    ) - phi * K * er * HS ** (2 * mu) * _NORM.cdf(eta * y2 - eta * vol)
     # Knock-out rebate (paid at expiry).
-    E = rebate * er * (
-        _NORM.cdf(eta * x2 - eta * vol) - HS ** (2 * mu) * _NORM.cdf(eta * y2 - eta * vol)
+    E = (
+        rebate
+        * er
+        * (
+            _NORM.cdf(eta * x2 - eta * vol)
+            - HS ** (2 * mu) * _NORM.cdf(eta * y2 - eta * vol)
+        )
     )
     # Knock-in rebate (paid at expiry if never knocked in).
     F = rebate * (

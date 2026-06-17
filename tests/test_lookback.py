@@ -7,7 +7,13 @@ from pricing.lookback import LookbackOptionPricer
 
 
 def test_floating_exceeds_vanilla(market, gbm_paths):
-    r, T, sigma, S0, q = market["r"], market["T"], market["sigma"], market["S0"], market["q"]
+    r, T, sigma, S0, q = (
+        market["r"],
+        market["T"],
+        market["sigma"],
+        market["S0"],
+        market["q"],
+    )
     pricer = LookbackOptionPricer()
     floating_call = pricer.price_floating_strike(gbm_paths, r, T, "call")
     vanilla = bsm_price(S0, S0, T, r, q, sigma, "call")
@@ -16,17 +22,33 @@ def test_floating_exceeds_vanilla(market, gbm_paths):
 
 
 def test_floating_call_matches_gsg(market, gbm_paths):
-    S0, r, q, sigma, T = market["S0"], market["r"], market["q"], market["sigma"], market["T"]
+    S0, r, q, sigma, T = (
+        market["S0"],
+        market["r"],
+        market["q"],
+        market["sigma"],
+        market["T"],
+    )
     pricer = LookbackOptionPricer()
-    mc = pricer.price_floating_strike(gbm_paths, r, T, "call", sigma=sigma, continuity_correction=True)
+    mc = pricer.price_floating_strike(
+        gbm_paths, r, T, "call", sigma=sigma, continuity_correction=True
+    )
     analytic = pricer.floating_call_analytical(S0, T, r, q, sigma)
     assert abs(mc.price - analytic) < 3 * mc.stderr
 
 
 def test_floating_put_matches_gsg(market, gbm_paths):
-    S0, r, q, sigma, T = market["S0"], market["r"], market["q"], market["sigma"], market["T"]
+    S0, r, q, sigma, T = (
+        market["S0"],
+        market["r"],
+        market["q"],
+        market["sigma"],
+        market["T"],
+    )
     pricer = LookbackOptionPricer()
-    mc = pricer.price_floating_strike(gbm_paths, r, T, "put", sigma=sigma, continuity_correction=True)
+    mc = pricer.price_floating_strike(
+        gbm_paths, r, T, "put", sigma=sigma, continuity_correction=True
+    )
     analytic = pricer.floating_put_analytical(S0, T, r, q, sigma)
     assert abs(mc.price - analytic) < 3 * mc.stderr
 

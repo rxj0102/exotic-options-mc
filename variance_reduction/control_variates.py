@@ -79,7 +79,9 @@ class ControlVariates:
         cv_payoffs = np.asarray(cv_payoffs, dtype=float)
         var_c = np.var(cv_payoffs, ddof=1)
         if beta is None:
-            beta = np.cov(payoffs, cv_payoffs, ddof=1)[0, 1] / var_c if var_c > 0 else 0.0
+            beta = (
+                np.cov(payoffs, cv_payoffs, ddof=1)[0, 1] / var_c if var_c > 0 else 0.0
+            )
 
         adjusted = payoffs - beta * (cv_payoffs - cv_analytical)
         price = float(np.mean(adjusted))
@@ -89,9 +91,7 @@ class ControlVariates:
         vr = float(crude_var / adj_var) if adj_var > 0 else float("inf")
         return price, stderr, vr
 
-    def _result(
-        self, payoffs, cv_payoffs, cv_analytical, method: str
-    ) -> MCResult:
+    def _result(self, payoffs, cv_payoffs, cv_analytical, method: str) -> MCResult:
         start = time.perf_counter()
         beta = np.cov(payoffs, cv_payoffs, ddof=1)[0, 1] / np.var(cv_payoffs, ddof=1)
         adjusted = payoffs - beta * (cv_payoffs - cv_analytical)
@@ -161,7 +161,9 @@ class ControlVariates:
         else:
             cv = disc * np.maximum(K - S_T, 0.0)
         cv_analytic = bsm_price(S0, K, T, r, q, sigma, option_type)
-        return self._result(np.asarray(payoffs, dtype=float), cv, cv_analytic, "control_variate_bsm")
+        return self._result(
+            np.asarray(payoffs, dtype=float), cv, cv_analytic, "control_variate_bsm"
+        )
 
     def delta_control(
         self,
@@ -183,4 +185,6 @@ class ControlVariates:
         """
         S_T = paths[:, -1]
         cv = S_T - S0 * np.exp(r * T)  # mean zero under Q
-        return self._result(np.asarray(payoffs, dtype=float), cv, 0.0, "control_variate_delta")
+        return self._result(
+            np.asarray(payoffs, dtype=float), cv, 0.0, "control_variate_delta"
+        )

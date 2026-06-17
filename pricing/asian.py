@@ -36,9 +36,7 @@ class AsianOptionPricer:
 
     def __init__(self, avg_frequency: str = "continuous") -> None:
         if avg_frequency not in _FREQ_STEPS:
-            raise ValueError(
-                f"avg_frequency must be one of {sorted(_FREQ_STEPS)}"
-            )
+            raise ValueError(f"avg_frequency must be one of {sorted(_FREQ_STEPS)}")
         self.avg_frequency = avg_frequency
 
     # ------------------------------------------------------------------
@@ -107,7 +105,9 @@ class AsianOptionPricer:
         avg = self._arithmetic_average(paths)
         payoff = self._payoff(avg, paths[:, -1], K, option_type, floating)
         disc = np.exp(-r * T) * payoff
-        res = MonteCarloEngine.summarize(disc, n_paths=paths.shape[0], method="arithmetic_asian")
+        res = MonteCarloEngine.summarize(
+            disc, n_paths=paths.shape[0], method="arithmetic_asian"
+        )
         res.elapsed_seconds = time.perf_counter() - start
         return res
 
@@ -125,7 +125,9 @@ class AsianOptionPricer:
         avg = self._geometric_average(paths)
         payoff = self._payoff(avg, paths[:, -1], K, option_type, floating)
         disc = np.exp(-r * T) * payoff
-        res = MonteCarloEngine.summarize(disc, n_paths=paths.shape[0], method="geometric_asian")
+        res = MonteCarloEngine.summarize(
+            disc, n_paths=paths.shape[0], method="geometric_asian"
+        )
         res.elapsed_seconds = time.perf_counter() - start
         return res
 

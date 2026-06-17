@@ -92,7 +92,9 @@ class ConvergenceAnalyzer:
         grid = [int(n) for n in (n_paths_list or _DEFAULT_GRID)]
         rows = []
         for n in grid:
-            errs = np.array([pricer(n).price - analytical_price for _ in range(n_trials)])
+            errs = np.array(
+                [pricer(n).price - analytical_price for _ in range(n_trials)]
+            )
             rows.append({"n_paths": n, "rmse": float(np.sqrt(np.mean(errs**2)))})
         return pd.DataFrame(rows)
 
