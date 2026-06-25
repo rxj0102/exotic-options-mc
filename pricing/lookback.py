@@ -143,6 +143,11 @@ class LookbackOptionPricer:
         """
         start = time.perf_counter()
         option_type = option_type.lower()
+        if lookback_start > lookback_end:
+            raise ValueError(
+                f"lookback_start ({lookback_start}) must not exceed "
+                f"lookback_end ({lookback_end})."
+            )
         n_steps = paths.shape[1] - 1
         i0 = max(int(np.floor(lookback_start * n_steps)), 0)
         i1 = min(int(np.ceil(lookback_end * n_steps)), n_steps)

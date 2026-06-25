@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import time
+import warnings
 from typing import Tuple
 
 import numpy as np
@@ -93,7 +94,21 @@ class ControlVariates:
 
     def _result(self, payoffs, cv_payoffs, cv_analytical, method: str) -> MCResult:
         start = time.perf_counter()
-        beta = np.cov(payoffs, cv_payoffs, ddof=1)[0, 1] / np.var(cv_payoffs, ddof=1)
+        var_c = np.var(cv_payoffs, ddof=1)
+        if var_c < 1e-12:
+            # Degenerate control (near-zero variance) -> fall back to crude MC.
+            warnings.warn(
+                "Control payoff has near-zero variance; returning crude MC estimate.",
+                RuntimeWarning,
+                stacklevel=2,
+            )
+            res = MonteCarloEngine.summarize(
+                payoffs, n_paths=len(payoffs), method=method
+            )
+            res.extra = {"beta": 0.0, "vr_ratio": 1.0}
+            res.elapsed_seconds = time.perf_counter() - start
+            return res
+        beta = np.cov(payoffs, cv_payoffs, ddof=1)[0, 1] / var_c
         adjusted = payoffs - beta * (cv_payoffs - cv_analytical)
         res = MonteCarloEngine.summarize(adjusted, n_paths=len(payoffs), method=method)
         crude_var = np.var(payoffs, ddof=1)

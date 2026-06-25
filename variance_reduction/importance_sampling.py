@@ -95,7 +95,7 @@ class ImportanceSampling:
         W_T = sqrtT * Z + theta * T
         S_T = S0 * np.exp((r - q - 0.5 * sigma**2) * T + sigma * W_T)
         # Likelihood ratio dP/dP~ for the shift theta on the drift of W.
-        L = np.exp(-theta * W_T + 0.5 * theta**2 * T)
+        L = np.clip(np.exp(-theta * W_T + 0.5 * theta**2 * T), 0.0, 1e300)
 
         disc = np.exp(-r * T)
         if option_type == "call":
@@ -170,7 +170,7 @@ class ImportanceSampling:
 
         # Likelihood ratio over the whole path.
         W_T = W[:, -1]
-        L = np.exp(-theta * W_T + 0.5 * theta**2 * T)
+        L = np.clip(np.exp(-theta * W_T + 0.5 * theta**2 * T), 0.0, 1e300)
 
         S_T = paths[:, -1]
         vanilla = (
