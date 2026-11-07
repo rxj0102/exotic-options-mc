@@ -47,9 +47,10 @@ class AsianOptionPricer:
         target = _FREQ_STEPS[self.avg_frequency]
         if target is None or target >= n_steps:
             return np.arange(1, n_steps + 1)
-        # Evenly spaced observation columns over (0, T].
-        idx = np.linspace(1, n_steps, target).round().astype(int)
-        return np.unique(idx)
+        # Observation k (k = 1..target) falls at time k*T/target, i.e. column
+        # round(k * n_steps / target); the last observation is at maturity.
+        idx = np.round(np.arange(1, target + 1) * n_steps / target).astype(int)
+        return np.unique(np.clip(idx, 1, n_steps))
 
     def _arithmetic_average(self, paths: np.ndarray) -> np.ndarray:
         cols = self._averaging_columns(paths.shape[1] - 1)
@@ -155,7 +156,7 @@ class AsianOptionPricer:
         float
         """
         if n_obs is None:
-            n_obs = _FREQ_STEPS[self.avg_frequency] or 252
+            n_obs = _FREQ_STEPS[self.avg_frequency] or 252  # continuous: pass n_obs=n_steps for an exact match
         return kemna_vorst_geometric_asian(S0, K, T, r, q, sigma, n_obs, option_type)
 
     def price_with_control_variate(
@@ -196,7 +197,10 @@ class AsianOptionPricer:
             self._geometric_average(paths), paths[:, -1], K, option_type, False
         )
 
-        n_obs = _FREQ_STEPS[self.avg_frequency] or (paths.shape[1] - 1)
+        # Use the number of averaging dates actually present in ``paths`` (it is
+        # below the nominal frequency when the grid is coarser), otherwise the
+        # control's analytical mean would not match the simulated control.
+        n_obs = len(self._averaging_columns(paths.shape[1] - 1))
         geo_analytic = kemna_vorst_geometric_asian(
             S0, K, T, r, q, sigma, n_obs, option_type
         )

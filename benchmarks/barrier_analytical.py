@@ -144,9 +144,9 @@ def _assemble(
     if barrier_type == "up-and-in" and option_type == "call":
         return A + E if ka else B - C + D + E
     if barrier_type == "down-and-in" and option_type == "put":
-        return A - B + D + E if ka else C + E
-    if barrier_type == "up-and-in" and option_type == "put":
         return B - C + D + E if ka else A + E
+    if barrier_type == "up-and-in" and option_type == "put":
+        return A - B + D + E if ka else C + E
 
     if barrier_type == "down-and-out" and option_type == "call":
         return A - C + F if ka else B - D + F
